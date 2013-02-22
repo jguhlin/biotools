@@ -14,7 +14,7 @@
 ;defrecord did NOT speed anything up
 (defn ^:private -parse [species version line]
 	(if-not (or (empty? line) (= \# (first line)))
-		(let [[landmark source gff_type start end score strand phase attributes] (map str (clojure.string/split line #"\t"))]
+		(let [[landmark source gff_type start end score strand phase attributes] (clojure.string/split line #"\t")]
          (conj (zipmap [:landmark :source :type :start :end :score :strand :phase :species :version]
                            [landmark source gff_type (Integer/parseInt start) (Integer/parseInt end) score strand phase species version])
                     (-parse-attributes attributes)))

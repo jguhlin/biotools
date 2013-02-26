@@ -3,6 +3,14 @@
 (defrecord Condition [FPKM conf_lo conf_high status])
 (defrecord FPKMTracking [tracking_id class_code nearest_ref_id gene_id gene_short_name tss_id locus length coverage conditions])
 
+(defn f->Condition
+  [^String a ^String b ^String c ^String d]
+  (->Condition
+    (Float/parseFloat a)
+    (Float/parseFloat b)
+    (Float/parseFloat c)
+    d))
+
 (defn ^:private -handle-conditions
   [FPKM conf_lo conf_hi status]
   )
@@ -34,7 +42,7 @@ expression conditions. Expression conditions are typically tissues but may also 
         locus
         length
         coverage
-        (doall (map hash-map conditions (map (partial apply ->Condition) (partition 4 the-conditions)))))))
+        (doall (map hash-map conditions (map (partial apply f->Condition) (partition 4 the-conditions)))))))
 
 (defn parse-reader 
   ([rdr]

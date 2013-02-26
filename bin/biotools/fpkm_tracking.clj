@@ -1,10 +1,12 @@
 (ns biotools.fpkm-tracking)
 
 (defrecord Condition [FPKM conf_lo conf_high status])
-(defrecord FPKMTracking [tracking_id class_code nearest_ref_id gene_id gene_short_name tss_id locus length coverage conditions])
+(defrecord FPKMTracking [tracking_id class_code nearest_ref_id gene_id gene_short_name tss_id locus length coverage FPKMS conditions])
 
 (defn f->Condition
-  [^String a ^String b ^String c ^String d]
+  ; No speed difference detected...
+  ;[^String a ^String b ^String c ^String d]
+  [a b c d]
   (->Condition
     (Float/parseFloat a)
     (Float/parseFloat b)
@@ -42,6 +44,7 @@ expression conditions. Expression conditions are typically tissues but may also 
         locus
         length
         coverage
+        (map #(Float/parseFloat %) (flatten (partition 1 4 the-conditions))) ; Always the same order, easy to do correlations on
         (doall (map hash-map conditions (map (partial apply f->Condition) (partition 4 the-conditions)))))))
 
 (defn parse-reader 

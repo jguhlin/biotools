@@ -15,10 +15,6 @@
     (Float/parseFloat c)
     d))
 
-(defn ^:private -handle-conditions
-  [FPKM conf_lo conf_hi status]
-  )
-
 (defn ^:private -parse-conditions
   "Parse the header line of the Cufflinks genes.fpkm_tracking and return it as a vector of each of the
 expression conditions. Expression conditions are typically tissues but may also be other types"

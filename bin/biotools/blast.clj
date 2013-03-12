@@ -4,7 +4,7 @@
             [clojure.core.reducers :as r]
             [iota :as iota]))
 
-(defrecord BlastHit [query-id subject-id pct-identity alignment-length mismatches gap-opens query-start query-end subject-start subject-end evalue bitscore query-length subject-length query-alignment-percent])
+(defrecord BlastHit [query-id subject-id pct-identity alignment-length mismatches gap-opens query-start query-end subject-start subject-end evalue bitscore query-length subject-length query-alignment-percent subject-alignment-percent])
 
 (defn ^:private -parse
   [line]
@@ -26,6 +26,7 @@
                 (Integer/parseInt qlen)
                 (Integer/parseInt slen)
                 (float (* 100 (/ (Integer/parseInt alignment-length) (Integer/parseInt qlen))))
+                (float (* 100 (/ (Integer/parseInt alignment-length) (Integer/parseInt slen))))
                 )))
 
 (defn parse-reader 

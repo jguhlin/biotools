@@ -53,3 +53,8 @@ line."
         :when (not (= (first term-data) "[Term]"))]
     (-convert term-data)))
 
+(defn parse-dbxref
+  [dbxref-str]
+  (for [entry (clojure.string/split dbxref-str #",")]
+    (let [[_ name _ description _ modifier] (re-find #"(\S+)\s?(\"(.*)\")?\s?(\{(.+)\})?" entry)]
+      {:name name :description description :modifier modifier})))

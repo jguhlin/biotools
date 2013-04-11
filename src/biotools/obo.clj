@@ -1,5 +1,7 @@
 (ns biotools.obo
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string]
+            [clojure.core.reducers :as r]
+            [iota :as iota]))
 
 (defn -parse-obo-file
   "Read the data from the given reader as a list of strings, where
@@ -9,7 +11,7 @@ line."
 
   (->> (line-seq reader)
        (partition-by #(= "[Term]" %))
-       (filter (comp not #(= "[Term]" %)))))
+       (filter (comp not #(re-find #"\[Term\]" (apply str %))))))
 
 (defn -convert-to-proper-map
   [[_ k v _]]
@@ -40,21 +42,59 @@ line."
 :id \"GO:0000001\"}
 "
   [data]
-  ;(apply merge-with 
-;         (comp vec flatten vector)
   (apply merge-with into
          (map -convert-to-proper-map
-              (map #(re-matches #"(.+): (.+?)\s*(!.*)?" %)
+              (map #(re-matches #"(.+?): (.+?)\s*(!.*)?" %)
                    (filter (complement clojure.string/blank?) data)))))
 
 (defn parse
   [rdr]
-  (for [term-data (rest (-parse-obo-file rdr))
-        :when (not (= (first term-data) "[Term]"))]
-    (-convert term-data)))
+  (for [term-data (rest (-parse-obo-file rdr))]
+        ; :when (not (= (first term-data) "[Term]"))]
+    (try (-convert term-data)
+      (catch Exception e 
+        (do
+          (println)
+          (println e)
+          (println (.getCause e))
+          (println (.printStackTrace e))
+          (Thread/sleep 2000)
+          (println)
+          (println "Error running -convert")
+          (println)
+          (doall (map println term-data))
+          (println)
+          (System/exit 0))
+      ))))
+
+; doesn't work!
+(defn parse-fast
+  [rdr]
+  (->> (rest (-parse-obo-file rdr))
+    (r/filter (fn [x] (complement clojure.string/blank?) (apply str x)))
+    (r/map -convert)
+    (r/foldcat)))
+  
 
 (defn parse-dbxref
   [dbxref-str]
-  (for [entry (clojure.string/split dbxref-str #",")]
+  (for [entry (clojure.string/split dbxref-str #"[^\\\\],")]
     (let [[_ name _ description _ modifier] (re-find #"(\S+)\s?(\"(.*)\")?\s?(\{(.+)\})?" entry)]
       {:name name :description description :modifier modifier})))
+
+(defn parse-def
+  "Used to parse the definition lines(after broken into tag/value pairs):
+   Should be passed a string that looked like \"This is an example\" [EC:2.1.2.1, GOH:pac]"
+  [def-str]
+  (if (clojure.string/blank? def-str)
+    {}
+    (let [[_ def _ dbxref] (re-find #"\"(.+)\"(\s+\[(.+)\])?" def-str)]
+      {:def def :dbxref dbxref}
+      )))
+
+(defn split-xref
+  [xref-str]
+  (let [[type id] (clojure.string/split xref-str #":")]
+    (if (nil? id)
+      (do (println "Invalid ID from parsing: " xref-str) (System/exit 0))
+      {:type type :id id})))

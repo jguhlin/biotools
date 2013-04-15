@@ -9,9 +9,22 @@ each string is made up of multiple lines, separated by // on it's own
 line."
   [reader]
 
+  (partition 2 
+  (->> (second (split-with #(not (re-find #"\[\w+\]" %)) (line-seq reader)))
+       (partition-by #(re-find #"\[\w+\]" (apply str %))))))
+  
+
+(defn -parse-obo-file-old
+  "Read the data from the given reader as a list of strings, where
+each string is made up of multiple lines, separated by // on it's own
+line."
+  [reader]
+
+  (partition 2 
   (->> (line-seq reader)
-       (partition-by #(= "[Term]" %))
-       (filter (comp not #(re-find #"\[Term\]" (apply str %))))))
+       (partition-by #(re-find #"\[\w+\]" (apply str %))))))
+       ; (map #(keep identity %))))
+;       (filter (comp not #(re-find #"\[\w+\]" (apply str %))))))
 
 (defn -convert-to-proper-map
   [[_ k v _]]
@@ -49,9 +62,9 @@ line."
 
 (defn parse
   [rdr]
-  (for [term-data (rest (-parse-obo-file rdr))]
-        ; :when (not (= (first term-data) "[Term]"))]
-    (try (-convert term-data)
+  (for [term-data (rest (-parse-obo-file rdr))
+        :when (= (ffirst term-data) "[Term]")]
+    (try (-convert (second term-data))
       (catch Exception e 
         (do
           (println)
@@ -78,9 +91,14 @@ line."
 
 (defn parse-dbxref
   [dbxref-str]
+  (let [[_ name _ description _ modifier] (re-find #"(\S+)\s?(\"(.*)\")?\s?(\{(.+)\})?" dbxref-str)]
+     {:id name :description description :modifier modifier}))
+
+(defn parse-dbxrefs
+  [dbxref-str]
   (for [entry (clojure.string/split dbxref-str #"[^\\\\],")]
-    (let [[_ name _ description _ modifier] (re-find #"(\S+)\s?(\"(.*)\")?\s?(\{(.+)\})?" entry)]
-      {:name name :description description :modifier modifier})))
+    (parse-dbxref entry)))
+
 
 (defn parse-def
   "Used to parse the definition lines(after broken into tag/value pairs):

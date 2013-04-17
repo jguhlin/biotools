@@ -44,3 +44,6 @@
           lines (drop 2 fv)]
       (r/map (partial -parse accessions) lines))))
 
+(defn get-accessions
+  [filename]
+  (-parse-header (second (iota/vec filename))))

@@ -4,4 +4,8 @@
   :url "http://github.com/jguhlin/biotools"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.5.0-RC16"]])
+  :dependencies [
+                 [org.clojure/clojure "1.5.1"]
+                 [iota "1.0.3"]
+                 
+                 ])

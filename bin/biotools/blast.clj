@@ -56,9 +56,16 @@
   "Parse BLAST+ results from a filename. Not lazy, but can exceed memory. Also accepts minimum %ID and minimum alignment length as a percentage.
    Percent alignment is based off of query length to the alignment-length, as a percentage. A 211nt alignment where 211 align
    from the blast results are 100% aligned."
-  ([opts pct-id-min query-align-min subject-align-min filename]
+  ([pct-id-min query-align-min subject-align-min filename]
     (let [filter-fn (-create-filter-fn pct-id-min query-align-min subject-align-min)]
       (->> (iota/vec filename)
         (r/map -parse)
         (r/filter filter-fn)
-        (r/foldcat)))))
+        (r/foldcat))))
+  ([filename]
+      (->> (iota/vec filename)
+        (r/map -parse)
+        (r/foldcat)))
+  )
+
+

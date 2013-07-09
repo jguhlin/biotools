@@ -3,7 +3,7 @@
             [clojure.core.reducers :as r]
             [iota :as iota]))
 
-(defn -parse-obo-file
+(defn -parse-obo-file-old
   "Read the data from the given reader as a list of strings, where
 each string is made up of multiple lines, separated by // on it's own
 line."
@@ -12,7 +12,18 @@ line."
   (partition 2 
   (->> (second (split-with #(not (re-find #"\[\w+\]" %)) (line-seq reader)))
        (partition-by #(re-find #"\[\w+\]" (apply str %))))))
-  
+
+(defn -parse-obo-file
+  "Read the data from the given reader as a list of strings, where
+each string is made up of multiple lines, separated by // on it's own
+line."
+  [reader]
+
+  (partition 2
+             (rest 
+               (partition-by #(re-find #"^\[\w+\]" (apply str %)) (line-seq reader)))))
+
+
 
 (defn -parse-obo-file-old
   "Read the data from the given reader as a list of strings, where
@@ -62,7 +73,7 @@ line."
 
 (defn parse
   [rdr]
-  (for [term-data (rest (-parse-obo-file rdr))
+  (for [term-data (-parse-obo-file rdr)
         :when (= (ffirst term-data) "[Term]")]
     (try (-convert (second term-data))
       (catch Exception e 
@@ -96,9 +107,9 @@ line."
 
 (defn parse-dbxrefs
   [dbxref-str]
-  (for [entry (clojure.string/split dbxref-str #"[^\\\\],")]
-    (parse-dbxref entry)))
-
+  (if (clojure.string/blank? dbxref-str) []
+    (for [entry (clojure.string/split dbxref-str #"[^\\\\],")]
+      (parse-dbxref entry))))
 
 (defn parse-def
   "Used to parse the definition lines(after broken into tag/value pairs):
@@ -107,7 +118,7 @@ line."
   (if (clojure.string/blank? def-str)
     {}
     (let [[_ def _ dbxref] (re-find #"\"(.+)\"(\s+\[(.+)\])?" def-str)]
-      {:def def :dbxref dbxref}
+      {:def def :dbxref (parse-dbxrefs dbxref)}
       )))
 
 (defn split-xref

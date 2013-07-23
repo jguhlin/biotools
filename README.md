@@ -4,7 +4,7 @@ Mostly for dealing with FASTA and GFF file formats. Blast output too. More of a 
 
 ## Usage
 
-It's a library. Coming soon.
+Basic file parsing functions for common bioinformatics formats.
 
 ## License
 

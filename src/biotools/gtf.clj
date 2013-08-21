@@ -10,11 +10,11 @@
    (map (fn [[k v]] [(keyword (clojure.string/lower-case k)) (clojure.string/replace v #"\"" "")]))
    (into {})))
 
-(defn ^:private -parse [species version line]
+(defn ^:private -parse [line]
 	(if-not (or (empty? line) (= \# (first line)))
 		(let [[landmark source gtf_type start end score strand phase attributes] (clojure.string/split line #"\t")]
-         (conj (zipmap [:landmark :source :type :start :end :score :strand :phase :species :version]
-                           [landmark source gtf_type (Integer/parseInt start) (Integer/parseInt end) score strand phase species version])
+         (conj (zipmap [:landmark :source :type :start :end :score :strand :phase]
+                           [landmark source gtf_type (Integer/parseInt start) (Integer/parseInt end) score strand phase])
                     (-parse-attributes attributes)))
     nil))
 
@@ -41,8 +41,8 @@
 
 (defn parse-reader-reducer
   "Experimental..."
-  [rdr species version]
-  (r/fold combine (r/map (partial -parse species version) (line-seq rdr))))
+  [rdr]
+  (r/fold combine (r/map (partial -parse) (line-seq rdr))))
 
 ; need to check that everything is working!!
 

@@ -54,7 +54,7 @@
   ([x y] (if (not (nil? y)) (conj x y) x)))
 
 (defn parse-reader-reducer
-  "Experimental..."
+  "Parses the GFF file as a memory mapped reducer, allowing faster speed."
   [rdr]
   (r/fold combine (r/map (partial -parse) (line-seq rdr))))
 

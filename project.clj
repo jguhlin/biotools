@@ -1,4 +1,4 @@
-(defproject biotools "0.1.0-SNAPSHOT"
+(defproject biotools "0.1.1-b1"
   :main biotools.core
   :description "Bioinformatic tools for clojure. Used in internal projects. Hoping this helps someone. Feel free to contribute!"
   :url "http://github.com/jguhlin/biotools"
@@ -6,6 +6,6 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [
                  [org.clojure/clojure "1.5.1"]
-                 [iota "1.0.3"]
+                 [iota "1.1.1"]
                  
                  ])

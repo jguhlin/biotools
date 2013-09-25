@@ -51,7 +51,11 @@ line."
         (= k "replaced_by")
         (= k "disjoint_from")) ; Treat these like a vector, so they merge later appropriately...
     {(keyword k) [(clojure.string/trim v)]} ; Not pretty, but not sure a better way...
-    {(keyword k) (clojure.string/trim v)}
+    (if (nil? v)
+      (do
+        (println "Keyword:" k "is nil")
+        {:nilfound [true]})
+      {(keyword k) (clojure.string/trim v)})
     )
   
   )
@@ -66,11 +70,17 @@ line."
 :id \"GO:0000001\"}
 "
   [data]
-  (apply merge-with into
-         (map -convert-to-proper-map
-              (map #(re-matches #"(.+?): (.+?)\s*(!.*)?" %)
-                   (filter (complement clojure.string/blank?) data)))))
-
+  (let [converted-data
+        (apply merge-with into
+               (map -convert-to-proper-map
+                    (map #(re-matches #"(.+?):\s*(.+?)\s*(!.*)?" %)
+                         (filter (complement clojure.string/blank?) data))))]
+    (if (:nilfound converted-data)
+      (do (println data) (println converted-data)))
+    converted-data))
+    
+    
+        
 (defn parse
   [rdr]
   (for [term-data (-parse-obo-file rdr)

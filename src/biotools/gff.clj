@@ -4,7 +4,13 @@
 (defrecord GFF-Entry [landmark source type start end score strand phase attributes id parent note conf_class node])
 
 (defn- ^:private -remove-quotes [val]
-  (if (re-find #"\"(.+)\"" val) (second (re-matches #"\"(.+)\"" val)) val))
+  (cond
+    (nil? val)
+      "" ; If a value is nil, has happened.
+    (re-find #"\"(.+)\"" val) 
+      (second (re-matches #"\"(.+)\"" val))
+    :else
+      val))
 
 (defn ^:private -parse-attributes [attributes]
 	(->> 

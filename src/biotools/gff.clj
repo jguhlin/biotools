@@ -1,5 +1,6 @@
 (ns biotools.gff
-  (:require [clojure.core.reducers :as r]))
+  (:require [clojure.core.reducers :as r]
+            [biotools.fasta :as fasta]))
 
 (defrecord GFF-Entry [landmark source type start end score strand phase attributes id parent note conf_class node])
 
@@ -20,7 +21,6 @@
    (into {})
    ))
 
-;defrecord did NOT speed anything up
 (defn ^:private -parse [line]
 	(if-not (or (empty? line) (= \# (first line)))
 		(let [[landmark source gff_type start end score strand phase attributes] (clojure.string/split line #"\t")]
@@ -29,14 +29,15 @@
                     (-parse-attributes attributes)))
     nil))
 
-(defn ^:private -orig-parse [line]
-	(if-not (= \# (first line))
-		(let [[landmark source gff_type start end score strand phase attributes] (map str (clojure.string/split line #"\t"))]
-         (into {} [(zipmap [:landmark :source :type :start :end :score :strand :phase]
-                           [(str landmark) source gff_type (read-string start) (read-string end) score strand phase])
-                    (first (-parse-attributes attributes))]))
-    nil))
+(defn split-fasta
+  "Splits the GFF3 file based on the FASTA directive."
+  [rdr]
+  (let [ls-rdr (line-seq rdr)]
+    (split-with (fn [x] (not (re-find #"^\#\#FASTA" x))) ls-rdr)))
 
+(defn parse-fasta 
+  [rdr]
+  (fasta/parse-from-seq (drop 1 (second (split-fasta rdr)))))
 
 (defn parse-file 
   "Given the filename,process the GFF file and return the attributes in a map, with keys for easy access. 
@@ -44,26 +45,24 @@
   [filename]
   
   (with-open [rdr (clojure.java.io/reader filename)]
-  (doseq [entry (line-seq rdr)]
+  (doseq [entry (first (split-fasta rdr))]
     (-parse entry)
     )))
 
-(defn parse-reader 
-  "Parse GFF from a reader. Maybe lazy."
-  [rdr]
-  (keep identity 
-        (for [entry (line-seq rdr)]
-          (-parse entry))))
-
 (defn combine
+  "Parse-reader-reducer helper fn"
   ([] '())
   ([x y] (if (not (nil? y)) (conj x y) x)))
 
-(defn parse-reader-reducer
-  "Parses the GFF file as a memory mapped reducer, allowing faster speed."
+(defn parse-reader 
+  "Parse GFF from a reader. Probably lazy."
   [rdr]
-  (r/fold combine (r/map (partial -parse) (line-seq rdr))))
+  (keep identity 
+        (for [entry (first (split-fasta rdr))]
+          (-parse entry))))
 
-; need to check that everything is working!!
-
+(defn parse-reader-reducer
+  "Parses the GFF file as a reducer."
+  [rdr]
+  (r/fold combine (r/map (fn [x] (-parse x)) (first (split-fasta rdr)))))
 

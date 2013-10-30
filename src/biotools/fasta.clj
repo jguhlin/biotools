@@ -14,7 +14,20 @@ line."
 (defn parse
   [rdr]
   (for [[header fasta_sequence] (partition 2 (-parse-fasta-file (line-seq rdr)))]
-    {:header_raw (apply str header) :header (subs (apply str header) 1) :id (first (clojure.string/split (subs (apply str header) 1) #"\s")) :seq (vec (string/replace (apply str fasta_sequence) #"\s" ""))}))
+    {:header_raw 
+     (apply str header) 
+     :header 
+     (subs 
+       (apply str header) 
+       1) 
+     :id 
+     (first 
+       (clojure.string/split (subs (apply str header) 1) #"\s")) 
+     :seq (vec 
+            (string/replace 
+              (apply str fasta_sequence) 
+              #"\s" ""))
+     }))
 
 (defn parse-from-seq
   [fasta]

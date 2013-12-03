@@ -41,9 +41,14 @@
     (for [line (line-seq rdr)]
       (-parse line))))
 
-(defn parse
-  "Not lazy, but handles big files I believe. Faster parser using reducers. Only need to pass the filename, not a reader"
+(defn parse-r
+  "Returns reducer rather than foldcat'd version"
   ([filename]
     (->> (iota/vec filename)
         (r/map -parse)
         (r/foldcat))))
+
+(defn parse
+  "Not lazy, but handles big files I believe. Faster parser using reducers. Only need to pass the filename, not a reader"
+  ([filename]
+    (r/foldcat (parse-r filename))))

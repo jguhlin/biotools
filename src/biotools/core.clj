@@ -1,4 +1,6 @@
-(ns biotools.core)
+(ns biotools.core
+ (:require
+            [clojure-csv.core :as csv]))
 
 (defn -main [& args]
   (println "hello"))

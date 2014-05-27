@@ -36,7 +36,7 @@
   ([opts rdr]
   (for [entry (line-seq rdr)]
     (-parse opts entry)))
-  ([opts pct-id-min pct-align-min rdr]
+  ([pct-id-min pct-align-min rdr]
     (keep (fn [x] (if (and (>= (:pct-identity x) pct-id-min) (>= (:query-alignment-percent x) pct-align-min)) x nil)) 
                     (for [entry (line-seq rdr)]
                       (-parse entry)))))

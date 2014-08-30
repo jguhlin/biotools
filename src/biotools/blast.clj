@@ -33,13 +33,20 @@
   "Parse BLAST+ results from a reader. Should be lazy. Now accepts minimum %ID and minimum alignment length as a percentage.
    Percent alignment is based off of query length to the alignment-length, as a percentage. A 211nt alignment where 211 align
    from the blast results are 100% aligned."
-  ([opts rdr]
-  (for [entry (line-seq rdr)]
-    (-parse opts entry)))
-  ([pct-id-min pct-align-min rdr]
-    (keep (fn [x] (if (and (>= (:pct-identity x) pct-id-min) (>= (:query-alignment-percent x) pct-align-min)) x nil)) 
-                    (for [entry (line-seq rdr)]
-                      (-parse entry)))))
+  ([rdr]
+    (for [entry (line-seq rdr)]
+      (-parse entry)))
+  ([pct-id-min query-align-min rdr]
+    (keep (fn [x] (if (and (>= (:pct-identity x) pct-id-min) (>= (:query-alignment-percent x) query-align-min)) x nil)) 
+          (for [entry (line-seq rdr)]
+            (-parse entry))))
+  ([pct-id-min query-align-min subject-align-min rdr]
+    (keep (fn [x] (if (and (>= (:pct-identity x) pct-id-min) 
+                           (>= (:query-alignment-percent x) query-align-min)
+                           (>= (:subject-alignment-percent x) subject-align-min))
+                    x nil)) 
+          (for [entry (line-seq rdr)]
+            (-parse entry)))))
 
 (defn -create-filter-fn 
   [pct-id-min query-align-min subject-align-min]

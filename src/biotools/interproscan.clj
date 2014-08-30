@@ -4,7 +4,7 @@
             [clojure.core.reducers :as r]
             [iota :as iota]))
 
-(defrecord InterproscanResults [protein-id md5-digest length analysis analysis-match-id analysis-name start stop score status date ipr-terms description go-terms])
+(defrecord InterproscanResults [protein-id md5-digest length analysis analysis-match-id analysis-name start stop score status date ipr-terms ipr-description go-terms extra-terms])
 
 (defn- ^:private -parse
   [line]
@@ -13,7 +13,7 @@
            analysis-match-id analysis-name
            start stop score status date 
            ipr-terms ipr-label 
-           go-terms] 
+           go-terms & extra-terms]
           (mapv clojure.string/trim (clojure.string/split line #"\t"))]
       
       (->InterproscanResults
@@ -32,8 +32,11 @@
         ipr-label
         (if go-terms 
           (clojure.string/split go-terms #"\|")
-          []
-          ))))
+          [])
+        (if (seq extra-terms) 
+          (clojure.string/split (first extra-terms) #"\|")
+          [])
+        )))
 
 (defn parse-lazy
   "Lazy parser. Slower method, given a reader parses the lines."

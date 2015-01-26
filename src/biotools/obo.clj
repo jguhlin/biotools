@@ -118,7 +118,7 @@ line."
 (defn parse-dbxrefs
   [dbxref-str]
   (if (clojure.string/blank? dbxref-str) []
-    (for [entry (clojure.string/split dbxref-str #"[^\\\\],")]
+    (for [entry (clojure.string/split dbxref-str #"(?<!\\\\),")] ; Split by comma unless comma is escaped
       (parse-dbxref entry))))
 
 (defn parse-def

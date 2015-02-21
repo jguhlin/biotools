@@ -3,16 +3,6 @@
             [clojure.core.reducers :as r]
             [iota :as iota]))
 
-(defn -parse-obo-file-old
-  "Read the data from the given reader as a list of strings, where
-each string is made up of multiple lines, separated by // on it's own
-line."
-  [reader]
-
-  (partition 2 
-  (->> (second (split-with #(not (re-find #"\[\w+\]" %)) (line-seq reader)))
-       (partition-by #(re-find #"\[\w+\]" (apply str %))))))
-
 (defn -parse-obo-file
   "Read the data from the given reader as a list of strings, where
 each string is made up of multiple lines, separated by // on it's own
@@ -22,20 +12,6 @@ line."
   (partition 2
              (rest 
                (partition-by #(re-find #"^\[\w+\]" (apply str %)) (line-seq reader)))))
-
-
-
-(defn -parse-obo-file-old
-  "Read the data from the given reader as a list of strings, where
-each string is made up of multiple lines, separated by // on it's own
-line."
-  [reader]
-
-  (partition 2 
-  (->> (line-seq reader)
-       (partition-by #(re-find #"\[\w+\]" (apply str %))))))
-       ; (map #(keep identity %))))
-;       (filter (comp not #(re-find #"\[\w+\]" (apply str %))))))
 
 (defn -convert-to-proper-map
   [[_ k v _]]
@@ -78,9 +54,7 @@ line."
     (if (:nilfound converted-data)
       (do (println data) (println converted-data)))
     converted-data))
-    
-    
-        
+
 (defn parse
   [rdr]
   (for [term-data (-parse-obo-file rdr)
@@ -100,15 +74,6 @@ line."
           (println)
           (System/exit 0))
       ))))
-
-; doesn't work!
-(defn parse-fast
-  [rdr]
-  (->> (rest (-parse-obo-file rdr))
-    (r/filter (fn [x] (complement clojure.string/blank?) (apply str x)))
-    (r/map -convert)
-    (r/foldcat)))
-  
 
 (defn parse-dbxref
   [dbxref-str]

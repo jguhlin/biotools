@@ -7,11 +7,22 @@
   "Read the data from the given reader as a list of strings, where
 each string is made up of multiple lines, separated by // on it's own
 line."
+  [filename]
+
+  (partition 2
+             (rest 
+               (partition-by #(re-find #"^\[\w+\]" (apply str %)) (iota/seq filename)))))
+
+(defn -parse-obo-file-old
+  "Read the data from the given reader as a list of strings, where
+each string is made up of multiple lines, separated by // on it's own
+line."
   [reader]
 
   (partition 2
              (rest 
                (partition-by #(re-find #"^\[\w+\]" (apply str %)) (line-seq reader)))))
+
 
 (defn -convert-to-proper-map
   [[_ k v _]]
@@ -56,6 +67,27 @@ line."
     converted-data))
 
 (defn parse
+  [filename]
+  (for [term-data (-parse-obo-file filename)
+        :when (= (ffirst term-data) "[Term]")]
+    (try (-convert (second term-data))
+      (catch Exception e 
+        (do
+          (println)
+          (println e)
+          (println (.getCause e))
+          (println (.printStackTrace e))
+          (Thread/sleep 2000)
+          (println)
+          (println "Error running -convert")
+          (println)
+          (doall (map println term-data))
+          (println)
+          (System/exit 0))
+      ))))
+
+
+(defn parse-old
   [rdr]
   (for [term-data (-parse-obo-file rdr)
         :when (= (ffirst term-data) "[Term]")]
@@ -74,6 +106,9 @@ line."
           (println)
           (System/exit 0))
       ))))
+
+
+
 
 (defn parse-dbxref
   [dbxref-str]

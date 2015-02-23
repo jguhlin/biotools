@@ -10,3 +10,4 @@ pom.xml
 .lein-plugins
 /bin
 .lein-repl-history
+*.prefs

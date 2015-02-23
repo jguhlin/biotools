@@ -9,9 +9,10 @@ each string is made up of multiple lines, separated by // on it's own
 line."
   [filename]
 
-  (partition 2
-             (rest 
-               (partition-by #(re-find #"^\[\w+\]" (apply str %)) (iota/seq filename)))))
+  (partition 
+    2
+    (rest 
+      (partition-by #(re-find #"^\[\w+\]" (apply str %)) (iota/seq filename)))))
 
 (defn -parse-obo-file-old
   "Read the data from the given reader as a list of strings, where
@@ -60,8 +61,13 @@ line."
   (let [converted-data
         (apply merge-with into
                (map -convert-to-proper-map
-                    (map #(re-matches #"(.+?):\s*(.+?)\s*(!.*)?" %)
-                         (filter (complement clojure.string/blank?) data))))]
+                    (filter identity
+                            (map (fn [x]
+                                   (when-not (re-find #"regexp" x)
+                                     (if (re-find #"\"" x)
+                                       (re-matches #"(.+?):\s*(\".+?\".+?)\s*(!.*)?\Z" x)
+                                       (re-matches #"(.+?):\s*(.+?)\s*(!.*)?\Z" x))))
+                         (filter (complement clojure.string/blank?) data)))))]
     (if (:nilfound converted-data)
       (do (println data) (println converted-data)))
     converted-data))
@@ -127,7 +133,7 @@ line."
   [def-str]
   (if (clojure.string/blank? def-str)
     {}
-    (let [[_ def _ dbxref] (re-find #"\"(.+)\"(\s+\[(.+)\])?" def-str)]
+    (let [[_ def _ dbxref] (re-find #"\"(.+)\"(\s+\[(.+)\])?\Z" def-str)]
       {:def def :dbxref (parse-dbxrefs dbxref)}
       )))
 

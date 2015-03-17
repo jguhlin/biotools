@@ -11,3 +11,4 @@ pom.xml
 /bin
 .lein-repl-history
 *.prefs
+*.prefs

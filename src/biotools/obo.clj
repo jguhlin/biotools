@@ -12,7 +12,7 @@ line."
   (partition 
     2
     (rest 
-      (partition-by #(re-find #"^\[\w+\]" (apply str %)) (iota/seq filename)))))
+      (partition-by #(re-find #"^\[\w+\]" (apply str %)) (iota/vec filename)))))
 
 (defn -parse-obo-file-old
   "Read the data from the given reader as a list of strings, where

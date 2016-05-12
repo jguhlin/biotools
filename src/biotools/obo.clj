@@ -4,26 +4,14 @@
             [iota :as iota]))
 
 (defn -parse-obo-file
-  "Read the data from the given reader as a list of strings, where
-each string is made up of multiple lines, separated by // on it's own
-line."
   [filename]
 
-  (partition 
+  (partition
     2
     (rest 
-      (partition-by #(re-find #"^\[\w+\]" (apply str %)) (iota/vec filename)))))
-
-(defn -parse-obo-file-old
-  "Read the data from the given reader as a list of strings, where
-each string is made up of multiple lines, separated by // on it's own
-line."
-  [reader]
-
-  (partition 2
-             (rest 
-               (partition-by #(re-find #"^\[\w+\]" (apply str %)) (line-seq reader)))))
-
+      (partition-by #(re-find #"^\[\w+\]" 
+                              (apply str %)) 
+                    (iota/vec filename)))))
 
 (defn -convert-to-proper-map
   [[_ k v _]]
@@ -63,10 +51,11 @@ line."
                (map -convert-to-proper-map
                     (filter identity
                             (map (fn [x]
-                                   (when-not (re-find #"regexp" x)
-                                     (if (re-find #"\"" x)
-                                       (re-matches #"(.+?):\s*(\".+?\".+?)\s*(!.*)?\Z" x)
-                                       (re-matches #"(.+?):\s*(.+?)\s*(!.*)?\Z" x))))
+                                   (let [y (clojure.string/replace x "\\" "")]
+                                     (when-not (re-find #"regexp" y)
+                                       (if (re-find #"\"" y)
+                                         (re-matches #"(.+?):\s*(\".+?\".+?)\s*(!.*)?\Z" y)
+                                         (re-matches #"(.+?):\s*(.+?)\s*(!.*)?\Z" y)))))
                          (filter (complement clojure.string/blank?) data)))))]
     (if (:nilfound converted-data)
       (do (println data) (println converted-data)))
@@ -112,9 +101,6 @@ line."
           (println)
           (System/exit 0))
       ))))
-
-
-
 
 (defn parse-dbxref
   [dbxref-str]

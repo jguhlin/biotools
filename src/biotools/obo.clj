@@ -26,7 +26,7 @@
         (= k "relationship")
         (= k "replaced_by")
         (= k "disjoint_from")) ; Treat these like a vector, so they merge later appropriately...
-    {(keyword k) [(clojure.string/trim v)]} ; Not pretty, but not sure a better way...
+    {(keyword k) [(clojure.string/trim (clojure.string/replace v "\\" ""))]} ; Not pretty, but not sure a better way...
     (if (nil? v)
       (do
         (println "Keyword:" k "is nil")
@@ -51,11 +51,11 @@
                (map -convert-to-proper-map
                     (filter identity
                             (map (fn [x]
-                                   (let [y (clojure.string/replace x "\\" "")]
-                                     (when-not (re-find #"regexp" y)
-                                       (if (re-find #"\"" y)
-                                         (re-matches #"(.+?):\s*(\".+?\".+?)\s*(!.*)?\Z" y)
-                                         (re-matches #"(.+?):\s*(.+?)\s*(!.*)?\Z" y)))))
+                                   ;(let [y (clojure.string/replace x "\\" "")]
+                                     (when-not (re-find #"regexp" x)
+                                       (if (re-find #"\"" x)
+                                         (re-matches #"(.+?):\s*(\".+?\".+?)\s*(!.*)?\Z" x)
+                                         (re-matches #"(.+?):\s*(.+?)\s*(!.*)?\Z" x))))
                          (filter (complement clojure.string/blank?) data)))))]
     (if (:nilfound converted-data)
       (do (println data) (println converted-data)))
@@ -110,8 +110,8 @@
 (defn parse-dbxrefs
   [dbxref-str]
   (if (clojure.string/blank? dbxref-str) []
-    (for [entry (clojure.string/split dbxref-str #"(?<!\\\\),")] ; Split by comma unless comma is escaped
-      (parse-dbxref entry))))
+    (for [entry (clojure.string/split dbxref-str #"(?<!\\),")] ; Split by comma unless comma is escaped
+      (parse-dbxref (clojure.string/replace entry "\\" "")))))
 
 (defn parse-def
   "Used to parse the definition lines(after broken into tag/value pairs):

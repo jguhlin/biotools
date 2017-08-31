@@ -4,9 +4,9 @@
   :url "http://github.com/jguhlin/biotools"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :plugins [[lein-codox "0.10.3"]]
   :dependencies [
-                 [org.clojure/clojure "1.5.1"]
-                 [iota "1.1.2"]
-                 ; [org.clojure/data.csv "0.1.2"]
-                 [clojure-csv/clojure-csv "2.0.1"]
-                 ])
+                 [org.clojure/clojure "1.8.0"]
+                 [iota "1.1.3"]
+                 [clojure-csv/clojure-csv "2.0.2"]])
+                 

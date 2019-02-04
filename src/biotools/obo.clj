@@ -8,9 +8,9 @@
 
   (partition
     2
-    (rest 
-      (partition-by #(re-find #"^\[\w+\]" 
-                              (apply str %)) 
+    (rest
+      (partition-by #(re-find #"^\[\w+\]"
+                              (apply str %))
                     (iota/vec filename)))))
 
 (defn -convert-to-proper-map
@@ -33,16 +33,16 @@
         {:nilfound [true]})
       {(keyword k) (clojure.string/trim v)})
     )
-  
+
   )
 
 (defn -convert
   "Converts to a map. Certain keys are turned into a vector, as appropriate. Here is an example:
-{:is_a [\"GO:0048308\" \"GO:0048311\"], 
-:synonym [\"\\\"mitochondrial inheritance\\\" EXACT []\"], 
-:def \"\\\"The distribution of mitochondria, including the mitochondrial genome, into daughter cells after mitosis or meiosis, mediated by interactions between mitochondria and the cytoskeleton.\\\" [GOC:mcc, PMID:10873824, PMID:11389764]\", 
-:namespace \"biological_process\", 
-:name \"mitochondrion inheritance\", 
+{:is_a [\"GO:0048308\" \"GO:0048311\"],
+:synonym [\"\\\"mitochondrial inheritance\\\" EXACT []\"],
+:def \"\\\"The distribution of mitochondria, including the mitochondrial genome, into daughter cells after mitosis or meiosis, mediated by interactions between mitochondria and the cytoskeleton.\\\" [GOC:mcc, PMID:10873824, PMID:11389764]\",
+:namespace \"biological_process\",
+:name \"mitochondrion inheritance\",
 :id \"GO:0000001\"}
 "
   [data]
@@ -66,7 +66,7 @@
   (for [term-data (-parse-obo-file filename)
         :when (= (ffirst term-data) "[Term]")]
     (try (-convert (second term-data))
-      (catch Exception e 
+      (catch Exception e
         (do
           (println)
           (println e)
@@ -87,7 +87,7 @@
   (for [term-data (-parse-obo-file rdr)
         :when (= (ffirst term-data) "[Term]")]
     (try (-convert (second term-data))
-      (catch Exception e 
+      (catch Exception e
         (do
           (println)
           (println e)
